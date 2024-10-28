@@ -31,3 +31,16 @@ uploads/
 # Miscellaneous
 .idea/
 .vscode/
+
+# Node modules
+node_modules/
+
+# Uploaded files
+uploads/
+
+# Environment files
+.env
+
+# Logs
+npm-debug.log
+yarn-debug.log
