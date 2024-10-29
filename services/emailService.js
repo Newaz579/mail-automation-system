@@ -54,11 +54,15 @@ const mg = mailgun({
 
 const sendSingleEmail = async ({ to, subject, body }) => {
   try {
+    console.log("Sending email to:", to);
+    console.log("Using domain:", process.env.MAILGUN_DOMAIN);  
+    console.log("API Key:", process.env.MAILGUN_API_KEY ? "Loaded" : "Not loaded"); 
+
     const message = {
       from: process.env.EMAIL_USER, 
-      to,                           
+      to,
       subject,
-      text: body                    
+      text: body,
     };
 
     const response = await mg.messages().send(message);
@@ -90,26 +94,6 @@ const sendSingleEmail = async ({ to, subject, body }) => {
   }
 };
 
-const processExcelFile = (filePath) => {
-  try {
-    const workbook = xlsx.readFile(filePath);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const emailData = xlsx.utils.sheet_to_json(sheet);
-
-    fs.unlinkSync(filePath);
-
-    const emails = emailData.map((row) => ({
-      to: row.Email,    
-      subject: row.Subject,
-      body: row.Body,
-    }));
-
-    return emails;
-  } catch (error) {
-    console.error("Error processing Excel file: ", error);
-    throw new Error(`Failed to process Excel file: ${error.message}`);
-  }
-};
 
 // const processExcelFile = (filePath) => {
 //   try {
@@ -120,7 +104,7 @@ const processExcelFile = (filePath) => {
 //     fs.unlinkSync(filePath);
 
 //     const emails = emailData.map((row) => ({
-//       to: row.Email,
+//       to: row.Email,    
 //       subject: row.Subject,
 //       body: row.Body,
 //     }));
@@ -132,26 +116,48 @@ const processExcelFile = (filePath) => {
 //   }
 // };
 
-// const sendMultipleEmails = async (emails) => {
-//   for (const email of emails) {
-//     const data = {
-//       from: process.env.EMAIL_USER,
-//       to: email.to,
-//       subject: email.subject,
-//       text: email.body,
-//     };
+const processExcelFile = (filePath) => {
+  try {
+    const workbook = xlsx.readFile(filePath);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const emailData = xlsx.utils.sheet_to_json(sheet);
 
-//     try {
-//       await mg.messages().send(data);
-//       console.log(`Email sent to ${email.to}`);
-//     } catch (error) {
-//       console.error(`Failed to send email to ${email.to}: ${error.message}`);
-//     }
-//   }
-// };
+    fs.unlinkSync(filePath);
+
+    const emails = emailData.map((row) => ({
+      to: row.Email,
+      subject: row.Subject,
+      body: row.Body,
+    }));
+
+    return emails;
+  } catch (error) {
+    console.error("Error processing Excel file: ", error);
+    throw new Error(`Failed to process Excel file: ${error.message}`);
+  }
+};
+
+const sendMultipleEmails = async (emails) => {
+  for (const email of emails) {
+    const data = {
+      from: process.env.EMAIL_USER,
+      to: email.to,
+      subject: email.subject,
+      text: email.body,
+    };
+
+    try {
+      await mg.messages().send(data);
+      console.log(`Email sent to ${email.to}`);
+    } catch (error) {
+      console.error(`Failed to send email to ${email.to}: ${error.message}`);
+    }
+  }
+};
 
 
 module.exports = {
     sendSingleEmail,
     processExcelFile,
+    sendMultipleEmails
 }
