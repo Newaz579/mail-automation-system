@@ -47,19 +47,6 @@ exports.sendSingleEmail = async (req, res) => {
   }
 };
 
-exports.uploadExcel = async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
-
-  try {
-    const emails = await emailService.processExcelFile(req.file.path);
-    res.status(200).json({ emails, message: "File uploaded and processed successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to process file", error: error.message });
-  }
-};
-
 // exports.uploadExcel = async (req, res) => {
 //   if (!req.file) {
 //     return res.status(400).json({ message: "No file uploaded" });
@@ -73,17 +60,34 @@ exports.uploadExcel = async (req, res) => {
 //   }
 // };
 
-// exports.sendMultipleEmails = async (req, res) => {
-//   const { emails } = req.body;
+exports.uploadExcel = async (req, res) => {
+  // console.log("File received:", req.file); // Debug line
 
-//   if (!emails || emails.length === 0) {
-//     return res.status(400).json({ message: "No emails to send" });
-//   }
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
 
-//   try {
-//     await emailService.sendMultipleEmails(emails);
-//     res.status(200).json({ message: "Emails sent successfully" });
-//   } catch (error) {
-//     res.status(500).json({ message: "Failed to send emails", error: error.message });
-//   }
-// };
+  try {
+    const emails = await emailService.processExcelFile(req.file.path);
+    // console.log(emails)
+    res.status(200).json({ emails, message: "File uploaded and processed successfully" });
+  } catch (error) {
+    console.error("Error processing file:", error.message);
+    res.status(500).json({ message: "Failed to process file", error: error.message });
+  }
+};
+
+exports.sendMultipleEmails = async (req, res) => {
+  const { emails } = req.body;
+
+  if (!emails || emails.length === 0) {
+    return res.status(400).json({ message: "No emails to send" });
+  }
+
+  try {
+    await emailService.sendMultipleEmails(emails);
+    res.status(200).json({ message: "Emails sent successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to send emails", error: error.message });
+  }
+};

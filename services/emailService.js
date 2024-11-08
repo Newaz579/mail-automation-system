@@ -122,17 +122,17 @@ const processExcelFile = (filePath) => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const emailData = xlsx.utils.sheet_to_json(sheet);
 
-    fs.unlinkSync(filePath);
+    fs.unlinkSync(filePath); 
 
     const emails = emailData.map((row) => ({
-      to: row.Email,
-      subject: row.Subject,
-      body: row.Body,
+      to: row.to,
+      subject: row.subject,
+      body: row.body,
     }));
-
+    console.log(emails)
     return emails;
   } catch (error) {
-    console.error("Error processing Excel file: ", error);
+    console.error("Error processing Excel file: ", error.message);
     throw new Error(`Failed to process Excel file: ${error.message}`);
   }
 };
